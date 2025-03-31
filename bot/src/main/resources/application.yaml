@@ -1,0 +1,23 @@
+app:
+  telegram-token: 7744985018:AAGA220UhJ-vFLoPqzUI259yoAmOynSDzIs
+
+scrapper:
+  base-url: "http://localhost:8081"
+
+spring:
+  application:
+    name: Bot
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
