@@ -7,11 +7,9 @@ import backend.academy.common.dto.LinkUpdate;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.model.LinkEntry;
-
+import backend.academy.scrapper.repository.LinkRepository;
 import java.time.Instant;
 import java.util.List;
-
-import backend.academy.scrapper.sender.NotificationSenderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +26,7 @@ public class LinkMonitoringServiceTest {
     private LinkRepository linkRepository;
 
     @Mock
-    private NotificationSenderService notificationSenderService;
+    private TelegramClient telegramClient;
 
     @Mock
     private GitHubClient gitHubClient;
@@ -53,12 +51,12 @@ public class LinkMonitoringServiceTest {
         Instant newLastUpdated = Instant.now().plusSeconds(60);
         when(gitHubClient.getLastUpdated(linkEntry.getUrl())).thenReturn(newLastUpdated);
         when(linkRepository.getAllLinks()).thenReturn(List.of(linkEntry));
-        when(notificationSenderService.sendNotification(any(LinkUpdate.class))).thenReturn(Mono.empty());
+        when(telegramClient.sendUpdate(any(LinkUpdate.class))).thenReturn(Mono.empty());
 
         linkMonitoringService.monitorLinks();
 
         ArgumentCaptor<LinkUpdate> captor = ArgumentCaptor.forClass(LinkUpdate.class);
-        verify(notificationSenderService, times(1)).sendNotification(captor.capture());
+        verify(telegramClient, times(1)).sendUpdate(captor.capture());
 
         LinkUpdate capturedUpdate = captor.getValue();
         assertNotNull(capturedUpdate);
@@ -76,6 +74,6 @@ public class LinkMonitoringServiceTest {
 
         linkMonitoringService.monitorLinks();
 
-        verify(notificationSenderService, times(0)).sendNotification(any(LinkUpdate.class));
+        verify(telegramClient, times(0)).sendUpdate(any(LinkUpdate.class));
     }
 }

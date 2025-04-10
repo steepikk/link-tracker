@@ -4,19 +4,20 @@ import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.exception.QuestionNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
-import java.time.Instant;
-
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class StackOverflowClient {
     private final ScrapperConfig scrapperConfig;
+
+    public StackOverflowClient(ScrapperConfig scrapperConfig) {
+        this.scrapperConfig = scrapperConfig;
+    }
 
     public Instant getLastUpdated(String questionUrl) {
         RestClient restClient = RestClient.create();
@@ -30,10 +31,6 @@ public class StackOverflowClient {
         try {
             response = restClient.get().uri(apiUrl).retrieve().body(String.class);
         } catch (RestClientResponseException e) {
-            log.atError()
-                    .addKeyValue("questionUrl", questionUrl)
-                    .setMessage("Не удалось получить информацию о вопросе")
-                    .log();
             throw new QuestionNotFoundException("Не удалось найти вопрос по ссылке");
         }
 
@@ -50,7 +47,6 @@ public class StackOverflowClient {
                 }
             }
         } catch (Exception e) {
-            log.error("Ошибка при обработке ответа от API StackOverflow", e);
             throw new QuestionNotFoundException("Не удалось обработать данные ответа");
         }
 

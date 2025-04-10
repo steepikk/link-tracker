@@ -3,29 +3,28 @@ package backend.academy.scrapper.service;
 import backend.academy.common.dto.LinkUpdate;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
-import backend.academy.scrapper.client.TelegramClient;
 import backend.academy.scrapper.model.LinkEntry;
 import backend.academy.scrapper.repository.LinkRepository;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
+import backend.academy.scrapper.sender.NotificationSenderService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 @Service
 public class LinkMonitoringService {
     private final LinkRepository linkRepository;
-    private final TelegramClient telegramClient;
+    private final NotificationSenderService notificationSenderService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public LinkMonitoringService(
             LinkRepository linkRepository,
-            TelegramClient telegramClient,
+            NotificationSenderService notificationSenderService,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient) {
         this.linkRepository = linkRepository;
-        this.telegramClient = telegramClient;
+        this.notificationSenderService = notificationSenderService;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
     }
@@ -57,7 +56,7 @@ public class LinkMonitoringService {
                     "GitHub repository updated",
                     List.copyOf(linkEntry.getTgChatIds()));
 
-            telegramClient.sendUpdate(linkUpdate).subscribe();
+            notificationSenderService.sendNotification(linkUpdate).subscribe();
         }
     }
 
@@ -73,7 +72,7 @@ public class LinkMonitoringService {
                     "StackOverflow question updated",
                     List.copyOf(linkEntry.getTgChatIds()));
 
-            telegramClient.sendUpdate(linkUpdate).subscribe();
+            notificationSenderService.sendNotification(linkUpdate).subscribe();
         }
     }
 }

@@ -1,8 +1,6 @@
 package backend.academy.scrapper.repository;
 
 import backend.academy.scrapper.model.LinkEntry;
-import org.springframework.stereotype.Repository;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -11,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class LinkRepository {

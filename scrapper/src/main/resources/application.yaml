@@ -3,7 +3,6 @@ app:
   stackoverflow:
     key: rl_jZX15ioJuP17ww4XY5AzyDf4D
     access-token: xsFxe8fd1p3aHBGmwYx7RA))
-  access-type: ORM
 
 bot:
   base-url: "http://localhost:8080"
@@ -11,13 +10,8 @@ bot:
 spring:
   application:
     name: Scrapper
-  datasource:
-    url: jdbc:postgresql://localhost:5432/link_tracker
-    username: postgres
-    password: Stepan2005
   liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.xml
-    enabled: true
+    enabled: false
   jpa:
     hibernate:
       ddl-auto: validate
