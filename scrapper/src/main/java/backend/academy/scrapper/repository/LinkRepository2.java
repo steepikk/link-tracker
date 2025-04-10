@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class LinkRepository {
+public class LinkRepository2 {
 
     private final Map<String, LinkEntry> links = new ConcurrentHashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);

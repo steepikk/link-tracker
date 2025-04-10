@@ -1,12 +1,12 @@
 package backend.academy.scrapper.controller;
 
-import backend.academy.common.dto.*;
-import backend.academy.scrapper.model.LinkEntry;
-import backend.academy.scrapper.repository.LinkRepository;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import backend.academy.common.dto.AddLinkRequest;
+import backend.academy.common.dto.ApiErrorResponse;
+import backend.academy.common.dto.LinkResponse;
+import backend.academy.common.dto.ListLinksResponse;
+import backend.academy.common.dto.RemoveLinkRequest;
+import backend.academy.scrapper.entity.Link;
+import backend.academy.scrapper.repository.orm.LinkRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,24 +16,24 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/links")
 public class LinkController {
 
-    private final LinkRepository repository;
+    private final LinkRepository linkRepository;
 
     private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
     private static final String BAD_REQUEST_CODE = "400";
     private static final String BAD_REQUEST_EXCEPTION = "IllegalArgumentException";
     private static final String BAD_REQUEST_MESSAGE = "Chat ID не должен быть null";
 
-    private static final String NOT_FOUND_DESCRIPTION = "Ссылка не найдена";
-    private static final String NOT_FOUND_CODE = "404";
-    private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
-    private static final String NOT_FOUND_MESSAGE = "Запрашиваемый ресурс не найден";
-
     public LinkController(LinkRepository repository) {
-        this.repository = repository;
+        this.linkRepository = repository;
     }
 
     @PostMapping
@@ -43,8 +43,7 @@ public class LinkController {
                     .body(createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
         }
         try {
-            LinkEntry entry =
-                    repository.addOrUpdateLink(request.getLink(), request.getTags(), request.getFilters(), chatId);
+            Link entry = linkRepository.addOrUpdateLink(request.getLink(), request.getTags(), request.getFilters(), chatId);
             LinkResponse response = toLinkResponse(entry);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -54,10 +53,14 @@ public class LinkController {
 
     @GetMapping
     public ResponseEntity<?> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId) {
+        if (chatId == null) {
+            return ResponseEntity.badRequest()
+                    .body(createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
+        }
         try {
-            Collection<LinkEntry> allEntries = repository.getAllLinks();
+            Collection<Link> allEntries = linkRepository.getAllLinks();
             List<LinkResponse> responses = allEntries.stream()
-                    .filter(entry -> entry.getTgChatIds().contains(chatId))
+                    .filter(entry -> entry.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId)))
                     .map(this::toLinkResponse)
                     .collect(Collectors.toList());
             ListLinksResponse response = new ListLinksResponse(responses, responses.size());
@@ -74,25 +77,19 @@ public class LinkController {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
         }
         try {
-            LinkEntry entry = repository.removeChatFromLink(request.getLink(), chatId);
-            if (entry == null)
-                return ResponseEntity.badRequest().body(createNotFoundError(NOT_FOUND_DESCRIPTION, new ArrayList<>()));
+            Link entry = linkRepository.removeChatFromLink(request.getLink(), chatId);
             return ResponseEntity.ok(toLinkResponse(entry));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
         }
     }
 
-    private LinkResponse toLinkResponse(LinkEntry entry) {
-        return new LinkResponse(entry.getId(), entry.getUrl(), entry.getTags(), entry.getFilters());
+    private LinkResponse toLinkResponse(Link entry) {
+        return new LinkResponse(entry.id(), entry.url(), entry.tags(), entry.filters());
     }
 
     private ApiErrorResponse createBadRequestError(String description, List<String> stacktrace) {
         return new ApiErrorResponse(
                 description, BAD_REQUEST_CODE, BAD_REQUEST_EXCEPTION, BAD_REQUEST_MESSAGE, stacktrace);
-    }
-
-    private ApiErrorResponse createNotFoundError(String description, List<String> stacktrace) {
-        return new ApiErrorResponse(description, NOT_FOUND_CODE, NOT_FOUND_EXCEPTION, NOT_FOUND_MESSAGE, stacktrace);
     }
 }

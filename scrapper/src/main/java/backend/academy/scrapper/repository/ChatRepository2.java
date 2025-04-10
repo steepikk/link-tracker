@@ -7,9 +7,9 @@ import java.util.logging.Logger;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ChatRepository {
+public class ChatRepository2 {
     private final Set<Long> chats = new ConcurrentSkipListSet<>();
-    Logger logger = Logger.getLogger(ChatRepository.class.getName());
+    Logger logger = Logger.getLogger(ChatRepository2.class.getName());
 
     public void registerChat(Long chatId) {
         if (!chats.add(chatId)) {

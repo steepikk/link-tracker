@@ -1,9 +1,10 @@
 package backend.academy.scrapper.controller;
 
 import backend.academy.common.dto.ApiErrorResponse;
-import backend.academy.scrapper.repository.ChatRepository;
 import java.util.ArrayList;
 import java.util.List;
+
+import backend.academy.scrapper.repository.orm.ChatRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

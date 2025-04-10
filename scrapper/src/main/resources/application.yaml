@@ -1,8 +1,8 @@
 app:
-  github-token: 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
+  github-token: ${GITHUB_TOKEN} # env variable
   stackoverflow:
-    key: rl_jZX15ioJuP17ww4XY5AzyDf4D
-    access-token: xsFxe8fd1p3aHBGmwYx7RA))
+    key: ${SO_TOKEN_KEY}
+    access-token: ${SO_ACCESS_TOKEN}
 
 bot:
   base-url: "http://localhost:8080"
@@ -12,10 +12,14 @@ spring:
     name: Scrapper
   liquibase:
     enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/link_tracker
+    username:
+    password:
   jpa:
     hibernate:
-      ddl-auto: validate
-    open-in-view: false
+      ddl-auto: update
+    show-sql: true
 
 server:
   port: 8081

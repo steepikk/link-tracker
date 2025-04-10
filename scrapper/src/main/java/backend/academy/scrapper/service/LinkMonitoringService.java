@@ -4,7 +4,7 @@ import backend.academy.common.dto.LinkUpdate;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
 import backend.academy.scrapper.model.LinkEntry;
-import backend.academy.scrapper.repository.LinkRepository;
+import backend.academy.scrapper.repository.LinkRepository2;
 import java.time.Instant;
 import java.util.List;
 import backend.academy.scrapper.sender.NotificationSenderService;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LinkMonitoringService {
-    private final LinkRepository linkRepository;
+    private final LinkRepository2 linkRepository;
     private final NotificationSenderService notificationSenderService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public LinkMonitoringService(
-            LinkRepository linkRepository,
+            LinkRepository2 linkRepository,
             NotificationSenderService notificationSenderService,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient) {
