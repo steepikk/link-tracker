@@ -6,7 +6,7 @@ import backend.academy.common.dto.LinkResponse;
 import backend.academy.common.dto.ListLinksResponse;
 import backend.academy.common.dto.RemoveLinkRequest;
 import backend.academy.scrapper.entity.Link;
-import backend.academy.scrapper.repository.orm.LinkRepository;
+import backend.academy.scrapper.repository.LinkRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

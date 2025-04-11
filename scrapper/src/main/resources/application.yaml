@@ -3,6 +3,7 @@ app:
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
+  access-type: ORM
 
 bot:
   base-url: "http://localhost:8080"
@@ -14,8 +15,8 @@ spring:
     enabled: false
   datasource:
     url: jdbc:postgresql://localhost:5432/link_tracker
-    username:
-    password:
+    username: postgres
+    password: Stepan2005
   jpa:
     hibernate:
       ddl-auto: update
