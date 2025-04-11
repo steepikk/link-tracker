@@ -1,10 +1,14 @@
 package backend.academy.scrapper.client;
 
+import backend.academy.common.dto.StackOverflowContent;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.exception.QuestionNotFoundException;
+import backend.academy.scrapper.util.LinkToApiRequestConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,9 +18,15 @@ import org.springframework.web.client.RestClientResponseException;
 @Component
 public class StackOverflowClient {
     private final ScrapperConfig scrapperConfig;
+    private final RestClient restClient;
+    private final ObjectMapper objectMapper;
+    private final LinkToApiRequestConverter linkToApiRequestConverter;
 
-    public StackOverflowClient(ScrapperConfig scrapperConfig) {
+    public StackOverflowClient(ScrapperConfig scrapperConfig, RestClient restClient, ObjectMapper objectMapper, LinkToApiRequestConverter linkToApiRequestConverter) {
         this.scrapperConfig = scrapperConfig;
+        this.restClient = restClient;
+        this.objectMapper = objectMapper;
+        this.linkToApiRequestConverter = linkToApiRequestConverter;
     }
 
     public Instant getLastUpdated(String questionUrl) {
