@@ -3,27 +3,29 @@ package backend.academy.scrapper.service;
 import backend.academy.common.dto.LinkUpdate;
 import backend.academy.scrapper.client.GitHubClient;
 import backend.academy.scrapper.client.StackOverflowClient;
-import backend.academy.scrapper.model.LinkEntry;
-import backend.academy.scrapper.repository.LinkRepository2;
+import backend.academy.scrapper.entity.Link;
 import java.time.Instant;
 import java.util.List;
+
+import backend.academy.scrapper.repository.orm.LinkRepositoryORM;
 import backend.academy.scrapper.sender.NotificationSenderService;
+import backend.academy.scrapper.entity.Chat;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LinkMonitoringService {
-    private final LinkRepository2 linkRepository;
+    private final LinkRepositoryORM linkRepositoryORM;
     private final NotificationSenderService notificationSenderService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public LinkMonitoringService(
-            LinkRepository2 linkRepository,
+            LinkRepositoryORM linkRepositoryORM,
             NotificationSenderService notificationSenderService,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient) {
-        this.linkRepository = linkRepository;
+        this.linkRepositoryORM = linkRepositoryORM;
         this.notificationSenderService = notificationSenderService;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
@@ -31,36 +33,42 @@ public class LinkMonitoringService {
 
     @Scheduled(fixedRate = 60000)
     public void monitorLinks() {
-        for (LinkEntry linkEntry : linkRepository.getAllLinks()) {
-            if (linkEntry.getUrl().contains("github.com")) {
+        for (Link linkEntry : linkRepositoryORM.getAllLinks()) {
+            if (linkEntry.url().contains("github.com")) {
                 checkGitHubLink(linkEntry);
-            } else if (linkEntry.getUrl().contains("stackoverflow.com")) {
+            } /*else if (linkEntry.getUrl().contains("stackoverflow.com")) {
                 checkStackOverflowLink(linkEntry);
-            }
+            }*/
         }
     }
 
-    private void checkGitHubLink(LinkEntry linkEntry) {
-        Instant lastUpdated = gitHubClient.getLastUpdated(linkEntry.getUrl());
-        if (linkEntry.getLastUpdated() == null && lastUpdated != null) {
-            linkEntry.setLastUpdated(lastUpdated);
+    private void checkGitHubLink(Link linkEntry) {
+        Instant lastUpdated = gitHubClient.getLastUpdated(linkEntry.url());
+        if (linkEntry.lastUpdated() == null && lastUpdated != null) {
+            linkEntry.lastUpdated(lastUpdated);
             return;
         }
-        if (lastUpdated != null && !lastUpdated.equals(linkEntry.getLastUpdated())) {
-            linkEntry.setLastUpdated(lastUpdated);
-            linkRepository.updateLink(linkEntry);
+        if (lastUpdated != null && !lastUpdated.equals(linkEntry.lastUpdated())) {
+            linkEntry.lastUpdated(lastUpdated);
+            linkRepositoryORM.updateLink(linkEntry);
+
+            List<Long> chatIds = linkEntry.chats()
+                    .stream()
+                    .map(Chat::chatId)
+                    .toList();
 
             LinkUpdate linkUpdate = new LinkUpdate(
-                    linkEntry.getId(),
-                    linkEntry.getUrl(),
+                    linkEntry.id(),
+                    linkEntry.url(),
                     "GitHub repository updated",
-                    List.copyOf(linkEntry.getTgChatIds()));
+                    chatIds
+            );
 
             notificationSenderService.sendNotification(linkUpdate).subscribe();
         }
     }
 
-    private void checkStackOverflowLink(LinkEntry linkEntry) {
+    /*private void checkStackOverflowLink(Link linkEntry) {
         Instant lastUpdated = stackOverflowClient.getLastUpdated(linkEntry.getUrl());
         if (lastUpdated != null && !lastUpdated.equals(linkEntry.getLastUpdated())) {
             linkEntry.setLastUpdated(lastUpdated);
@@ -74,5 +82,5 @@ public class LinkMonitoringService {
 
             notificationSenderService.sendNotification(linkUpdate).subscribe();
         }
-    }
+    }*/
 }
