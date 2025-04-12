@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Repository
-@ConditionalOnProperty(name = "access-type", havingValue = "ORM", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.access-type", havingValue = "ORM", matchIfMissing = true)
 public interface ChatRepositoryORM extends JpaRepository<Chat, Long>, ChatRepository {
     Logger logger = Logger.getLogger(ChatRepositoryORM.class.getName());
 

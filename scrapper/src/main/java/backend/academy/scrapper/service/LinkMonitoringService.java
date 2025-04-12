@@ -7,7 +7,7 @@ import backend.academy.scrapper.entity.Link;
 import java.time.Instant;
 import java.util.List;
 
-import backend.academy.scrapper.repository.orm.LinkRepositoryORM;
+import backend.academy.scrapper.repository.LinkRepository;
 import backend.academy.scrapper.sender.NotificationSenderService;
 import backend.academy.scrapper.entity.Chat;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,17 +15,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LinkMonitoringService {
-    private final LinkRepositoryORM linkRepositoryORM;
+    private final LinkRepository linkRepository;
     private final NotificationSenderService notificationSenderService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public LinkMonitoringService(
-            LinkRepositoryORM linkRepositoryORM,
+            LinkRepository linkRepository,
             NotificationSenderService notificationSenderService,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient) {
-        this.linkRepositoryORM = linkRepositoryORM;
+        this.linkRepository = linkRepository;
         this.notificationSenderService = notificationSenderService;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
@@ -33,7 +33,7 @@ public class LinkMonitoringService {
 
     @Scheduled(fixedRate = 60000)
     public void monitorLinks() {
-        for (Link linkEntry : linkRepositoryORM.getAllLinks()) {
+        for (Link linkEntry : linkRepository.getAllLinks()) {
             if (linkEntry.url().contains("github.com")) {
                 checkGitHubLink(linkEntry);
             } /*else if (linkEntry.getUrl().contains("stackoverflow.com")) {
@@ -50,7 +50,7 @@ public class LinkMonitoringService {
         }
         if (lastUpdated != null && !lastUpdated.equals(linkEntry.lastUpdated())) {
             linkEntry.lastUpdated(lastUpdated);
-            linkRepositoryORM.updateLink(linkEntry);
+            linkRepository.updateLink(linkEntry);
 
             List<Long> chatIds = linkEntry.chats()
                     .stream()

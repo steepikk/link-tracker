@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@ConditionalOnProperty(name = "access-type", havingValue = "ORM", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.access-type", havingValue = "ORM", matchIfMissing = true)
 public interface LinkRepositoryORM extends JpaRepository<Link, Long>, LinkRepository {
     Optional<Link> findByUrl(String url);
 
