@@ -5,6 +5,7 @@ import backend.academy.scrapper.repository.LinkRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -29,6 +30,7 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
+    @Transactional
     public Link addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId)
             throws IllegalArgumentException {
         validateUrl(url);
@@ -65,6 +67,7 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
+    @Transactional
     public Link removeChatFromLink(String url, Long tgChatId) throws Exception {
         validateUrl(url);
         validateChatId(tgChatId);
@@ -86,10 +89,10 @@ public class LinkServiceImpl implements LinkService {
             linkRepository.deleteTags(link.id());
             linkRepository.deleteFilters(link.id());
             linkRepository.deleteLink(link.id());
-            return link;
+            return null;
         }
 
-        return link;
+        return linkRepository.findByUrl(url).orElse(null);
     }
 
     @Override
@@ -99,6 +102,7 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
+    @Transactional
     public void updateLink(Link link) {
         if (link == null) {
             throw new IllegalArgumentException("Link cannot be null");
@@ -134,6 +138,27 @@ public class LinkServiceImpl implements LinkService {
         }
     }
 
+    @Override
+    public Collection<Link> findByTag(String tag) {
+        validateTag(tag);
+        logger.debug("Finding links by tag: {}", tag);
+        return linkRepository.findByTag(tag);
+    }
+
+    @Override
+    public List<String> getAllTags() {
+        logger.debug("Retrieving all tags");
+        return linkRepository.getAllTags();
+    }
+
+    @Override
+    @Transactional
+    public void deleteTag(String tag) {
+        validateTag(tag);
+        logger.info("Deleting tag: {}", tag);
+        linkRepository.deleteTag(tag);
+    }
+
     private void validateUrl(String url) {
         if (url == null || url.trim().isEmpty()) {
             throw new IllegalArgumentException("URL cannot be null or empty");
@@ -148,6 +173,12 @@ public class LinkServiceImpl implements LinkService {
     private void validateChatId(Long tgChatId) {
         if (tgChatId == null || tgChatId <= 0) {
             throw new IllegalArgumentException("Chat ID must be a positive number");
+        }
+    }
+
+    private void validateTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tag cannot be null or empty");
         }
     }
 

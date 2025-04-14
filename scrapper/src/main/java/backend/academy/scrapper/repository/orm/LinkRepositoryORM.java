@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @ConditionalOnProperty(name = "app.access-type", havingValue = "ORM", matchIfMissing = true)
@@ -111,5 +112,31 @@ public interface LinkRepositoryORM extends JpaRepository<Link, Long>, LinkReposi
     @Override
     default Collection<Link> getAllLinks() {
         return findAll();
+    }
+
+    @Override
+    default Collection<Link> findByTag(String tag) {
+        return findAll().stream()
+                .filter(link -> link.tags().contains(tag))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    default List<String> getAllTags() {
+        return findAll().stream()
+                .flatMap(link -> link.tags().stream())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    default void deleteTag(String tag) {
+        findAll().forEach(link -> {
+            List<String> updatedTags = new ArrayList<>(link.tags());
+            updatedTags.remove(tag);
+            link.tags(updatedTags);
+            save(link);
+        });
     }
 }

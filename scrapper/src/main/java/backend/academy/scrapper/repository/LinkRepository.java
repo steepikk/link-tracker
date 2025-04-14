@@ -33,4 +33,10 @@ public interface LinkRepository {
     int countChatsByLinkId(Long linkId);
 
     Collection<Link> getAllLinks();
+
+    Collection<Link> findByTag(String tag);
+
+    List<String> getAllTags();
+
+    void deleteTag(String tag);
 }

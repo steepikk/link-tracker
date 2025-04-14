@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -81,6 +82,30 @@ public class LinkController {
             return ResponseEntity.ok(toLinkResponse(entry));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
+        }
+    }
+
+    @GetMapping("/by-tag")
+    public ResponseEntity<Collection<Link>> findByTag(@RequestParam String tag) {
+        try {
+            return ResponseEntity.ok(linkService.findByTag(tag));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<List<String>> getAllTags() {
+        return ResponseEntity.ok(linkService.getAllTags());
+    }
+
+    @DeleteMapping("/tags")
+    public ResponseEntity<Void> deleteTag(@RequestParam String tag) {
+        try {
+            linkService.deleteTag(tag);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 

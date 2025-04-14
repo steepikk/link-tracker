@@ -16,4 +16,10 @@ public interface LinkService {
     void updateLink(Link link);
 
     boolean isLinkAlive(String url);
+
+    Collection<Link> findByTag(String tag);
+
+    List<String> getAllTags();
+
+    void deleteTag(String tag);
 }

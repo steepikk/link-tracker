@@ -132,6 +132,34 @@ public class LinkRepositorySQL implements LinkRepository {
         return jdbcTemplate.query(sql, this::mapRowToLink);
     }
 
+    @Override
+    public Collection<Link> findByTag(String tag) {
+        String sql = "SELECT l.id, l.url, l.last_updated, " +
+                "STRING_AGG(DISTINCT lt2.tag, ',') as tags, " +
+                "STRING_AGG(DISTINCT lf.filter, ',') as filters, " +
+                "STRING_AGG(CAST(lc.chat_id AS TEXT), ',') as chat_ids " +
+                "FROM links l " +
+                "JOIN link_tags lt ON l.id = lt.link_id " +
+                "LEFT JOIN link_tags lt2 ON l.id = lt2.link_id " +
+                "LEFT JOIN link_filters lf ON l.id = lf.link_id " +
+                "LEFT JOIN link_chat lc ON l.id = lc.link_id " +
+                "WHERE lt.tag = ? " +
+                "GROUP BY l.id, l.url, l.last_updated";
+        return jdbcTemplate.query(sql, this::mapRowToLink, tag);
+    }
+
+    @Override
+    public List<String> getAllTags() {
+        String sql = "SELECT DISTINCT tag FROM link_tags ORDER BY tag";
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+
+    @Override
+    public void deleteTag(String tag) {
+        String sql = "DELETE FROM link_tags WHERE tag = ?";
+        jdbcTemplate.update(sql, tag);
+    }
+
     private Link mapRowToLink(ResultSet rs, int rowNum) throws SQLException {
         Long id = rs.getLong("id");
         String url = rs.getString("url");
