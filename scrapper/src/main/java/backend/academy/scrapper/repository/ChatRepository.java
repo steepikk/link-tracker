@@ -1,9 +1,9 @@
 package backend.academy.scrapper.repository;
 
 public interface ChatRepository {
-    void registerChat(Long chatId);
+    void addChatById(Long chatId);
 
-    boolean removeChat(Long chatId);
+    void deleteChatById(Long chatId);
 
     boolean existsById(Long chatId);
 }

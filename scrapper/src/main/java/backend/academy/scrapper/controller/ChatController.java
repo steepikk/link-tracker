@@ -4,7 +4,7 @@ import backend.academy.common.dto.ApiErrorResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import backend.academy.scrapper.repository.ChatRepository;
+import backend.academy.scrapper.service.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/tg-chat")
 public class ChatController {
-    private final ChatRepository chatRepository;
+    private final ChatService chatService;
 
     private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
     private static final String BAD_REQUEST_CODE = "400";
@@ -28,8 +28,8 @@ public class ChatController {
     private static final String NOT_FOUND_EXCEPTION = "NotFoundException";
     private static final String NOT_FOUND_MESSAGE = "Запрашиваемый ресурс не найден";
 
-    public ChatController(ChatRepository chatRepository) {
-        this.chatRepository = chatRepository;
+    public ChatController(ChatService chatService) {
+        this.chatService = chatService;
     }
 
     @PostMapping("/{id}")
@@ -38,7 +38,7 @@ public class ChatController {
             return ResponseEntity.badRequest()
                     .body(createBadRequestError("Не указан идентификатор чата.", new ArrayList<>()));
         }
-        chatRepository.registerChat(chatId);
+        chatService.registerChat(chatId);
         return ResponseEntity.ok("Чат зарегистрирован");
     }
 
@@ -47,7 +47,7 @@ public class ChatController {
         if (chatId == null) {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
         }
-        boolean removed = chatRepository.removeChat(chatId);
+        boolean removed = chatService.removeChat(chatId);
         if (!removed) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createNotFoundError(NOT_FOUND_DESCRIPTION, new ArrayList<>()));

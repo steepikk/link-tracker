@@ -14,20 +14,14 @@ import java.util.logging.Logger;
 public interface ChatRepositoryORM extends JpaRepository<Chat, Long>, ChatRepository {
     Logger logger = Logger.getLogger(ChatRepositoryORM.class.getName());
 
-    default void registerChat(Long chatId) {
-        if (existsById(chatId)) {
-            logger.log(Level.INFO, "This chat id is already registered");
-        } else {
-            save(new Chat(chatId));
-        }
+    default void addChatById(Long chatId) {
+        save(new Chat(chatId));
+        logger.log(Level.INFO, "Registered chat id: {0}", chatId);
     }
 
-    default boolean removeChat(Long chatId) {
-        if (existsById(chatId)) {
-            deleteById(chatId);
-            return true;
-        }
-        return false;
+    default void deleteChatById(Long chatId) {
+        deleteById(chatId);
+        logger.log(Level.INFO, "Removed chat id: {0}", chatId);
     }
 
     boolean existsById(Long chatId);

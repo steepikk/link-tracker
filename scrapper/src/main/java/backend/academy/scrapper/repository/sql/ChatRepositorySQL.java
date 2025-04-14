@@ -21,26 +21,18 @@ public class ChatRepositorySQL implements ChatRepository {
     }
 
     @Override
-    public void registerChat(Long chatId) {
-        if (existsById(chatId)) {
-            logger.log(Level.INFO, "This chat id is already registered: {0}", chatId);
-        } else {
-            String sql = "INSERT INTO chats (chat_id) VALUES (?)";
-            jdbcTemplate.update(sql, chatId);
-            logger.log(Level.INFO, "Registered chat id: {0}", chatId);
-        }
+    public void addChatById(Long chatId) {
+        String sql = "INSERT INTO chats (chat_id) VALUES (?)";
+        jdbcTemplate.update(sql, chatId);
+        logger.log(Level.INFO, "Registered chat id: {0}", chatId);
+
     }
 
     @Override
-    public boolean removeChat(Long chatId) {
-        if (existsById(chatId)) {
-            String sql = "DELETE FROM chats WHERE chat_id = ?";
-            jdbcTemplate.update(sql, chatId);
-            logger.log(Level.INFO, "Removed chat id: {0}", chatId);
-            return true;
-        }
-        logger.log(Level.INFO, "Chat id not found for removal: {0}", chatId);
-        return false;
+    public void deleteChatById(Long chatId) {
+        String sql = "DELETE FROM chats WHERE chat_id = ?";
+        jdbcTemplate.update(sql, chatId);
+        logger.log(Level.INFO, "Removed chat id: {0}", chatId);
     }
 
     @Override
