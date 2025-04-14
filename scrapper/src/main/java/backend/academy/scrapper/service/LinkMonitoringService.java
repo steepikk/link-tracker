@@ -7,7 +7,6 @@ import backend.academy.scrapper.entity.Link;
 import java.time.Instant;
 import java.util.List;
 
-import backend.academy.scrapper.repository.LinkRepository;
 import backend.academy.scrapper.sender.NotificationSenderService;
 import backend.academy.scrapper.entity.Chat;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,17 +14,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LinkMonitoringService {
-    private final LinkRepository linkRepository;
+    private final LinkService linkService;
     private final NotificationSenderService notificationSenderService;
     private final GitHubClient gitHubClient;
     private final StackOverflowClient stackOverflowClient;
 
     public LinkMonitoringService(
-            LinkRepository linkRepository,
+            LinkService linkService,
             NotificationSenderService notificationSenderService,
             GitHubClient gitHubClient,
             StackOverflowClient stackOverflowClient) {
-        this.linkRepository = linkRepository;
+        this.linkService = linkService;
         this.notificationSenderService = notificationSenderService;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
@@ -33,7 +32,7 @@ public class LinkMonitoringService {
 
     @Scheduled(fixedRate = 60000)
     public void monitorLinks() {
-        for (Link linkEntry : linkRepository.getAllLinks()) {
+        for (Link linkEntry : linkService.getAllLinks()) {
             if (linkEntry.url().contains("github.com")) {
                 checkGitHubLink(linkEntry);
             } /*else if (linkEntry.getUrl().contains("stackoverflow.com")) {
@@ -50,7 +49,7 @@ public class LinkMonitoringService {
         }
         if (lastUpdated != null && !lastUpdated.equals(linkEntry.lastUpdated())) {
             linkEntry.lastUpdated(lastUpdated);
-            linkRepository.updateLink(linkEntry);
+            linkService.updateLink(linkEntry);
 
             List<Long> chatIds = linkEntry.chats()
                     .stream()

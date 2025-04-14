@@ -6,7 +6,7 @@ import backend.academy.common.dto.LinkResponse;
 import backend.academy.common.dto.ListLinksResponse;
 import backend.academy.common.dto.RemoveLinkRequest;
 import backend.academy.scrapper.entity.Link;
-import backend.academy.scrapper.repository.LinkRepository;
+import backend.academy.scrapper.service.LinkService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/links")
 public class LinkController {
 
-    private final LinkRepository linkRepository;
+    private final LinkService linkService;
 
     private static final String BAD_REQUEST_DESCRIPTION = "Некорректные параметры запроса";
     private static final String BAD_REQUEST_CODE = "400";
     private static final String BAD_REQUEST_EXCEPTION = "IllegalArgumentException";
     private static final String BAD_REQUEST_MESSAGE = "Chat ID не должен быть null";
 
-    public LinkController(LinkRepository repository) {
-        this.linkRepository = repository;
+    public LinkController(LinkService linkService) {
+        this.linkService = linkService;
     }
 
     @PostMapping
@@ -43,7 +43,7 @@ public class LinkController {
                     .body(createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
         }
         try {
-            Link entry = linkRepository.addOrUpdateLink(request.getLink(), request.getTags(), request.getFilters(), chatId);
+            Link entry = linkService.addOrUpdateLink(request.getLink(), request.getTags(), request.getFilters(), chatId);
             LinkResponse response = toLinkResponse(entry);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -58,7 +58,7 @@ public class LinkController {
                     .body(createBadRequestError("Неуказан идентификатор чата", new ArrayList<>()));
         }
         try {
-            Collection<Link> allEntries = linkRepository.getAllLinks();
+            Collection<Link> allEntries = linkService.getAllLinks();
             List<LinkResponse> responses = allEntries.stream()
                     .filter(entry -> entry.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId)))
                     .map(this::toLinkResponse)
@@ -77,7 +77,7 @@ public class LinkController {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
         }
         try {
-            Link entry = linkRepository.removeChatFromLink(request.getLink(), chatId);
+            Link entry = linkService.removeChatFromLink(request.getLink(), chatId);
             return ResponseEntity.ok(toLinkResponse(entry));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));

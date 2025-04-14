@@ -7,9 +7,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -52,10 +49,6 @@ public class LinkRepositorySQL implements LinkRepository {
     @Override
     public Link addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId)
             throws IllegalArgumentException {
-        if (!isLinkAlive(url)) {
-            throw new IllegalArgumentException("Link is not alive");
-        }
-
         Optional<Link> existingLink = findByUrl(url);
         Long linkId;
         Instant now = Instant.now();
@@ -161,21 +154,6 @@ public class LinkRepositorySQL implements LinkRepository {
             for (String filter : link.filters()) {
                 jdbcTemplate.update(filterSql, link.id(), filter);
             }
-        }
-    }
-
-    @Override
-    public boolean isLinkAlive(String url) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            return 200 <= responseCode && responseCode < 400;
-        } catch (IOException e) {
-            return false;
         }
     }
 
