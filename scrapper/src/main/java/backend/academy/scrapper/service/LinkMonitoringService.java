@@ -30,16 +30,16 @@ public class LinkMonitoringService {
         this.stackOverflowClient = stackOverflowClient;
     }
 
-    @Scheduled(fixedRate = 60000)
+    /*@Scheduled(fixedRate = 60000)
     public void monitorLinks() {
         for (Link linkEntry : linkService.getAllLinks()) {
             if (linkEntry.url().contains("github.com")) {
                 checkGitHubLink(linkEntry);
-            } /*else if (linkEntry.getUrl().contains("stackoverflow.com")) {
+            } *//*else if (linkEntry.getUrl().contains("stackoverflow.com")) {
                 checkStackOverflowLink(linkEntry);
-            }*/
+            }*//*
         }
-    }
+    }*/
 
     private void checkGitHubLink(Link linkEntry) {
         Instant lastUpdated = gitHubClient.getLastUpdated(linkEntry.url());

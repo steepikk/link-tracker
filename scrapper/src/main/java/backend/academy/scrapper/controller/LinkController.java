@@ -60,12 +60,7 @@ public class LinkController {
         }
         try {
             Collection<Link> allEntries = linkService.getAllLinks();
-            List<LinkResponse> responses = allEntries.stream()
-                    .filter(entry -> entry.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId)))
-                    .map(this::toLinkResponse)
-                    .collect(Collectors.toList());
-            ListLinksResponse response = new ListLinksResponse(responses, responses.size());
-            return ResponseEntity.ok(response);
+            return toListLinkResponse(chatId, allEntries);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(createBadRequestError(BAD_REQUEST_DESCRIPTION, new ArrayList<>()));
         }
@@ -86,9 +81,10 @@ public class LinkController {
     }
 
     @GetMapping("/by-tag")
-    public ResponseEntity<Collection<Link>> findByTag(@RequestParam String tag) {
+    public ResponseEntity<?> findByTag(@RequestHeader("Tg-Chat-Id") Long chatId, @RequestParam String tag) {
         try {
-            return ResponseEntity.ok(linkService.findByTag(tag));
+            Collection<Link> allEntries = linkService.findByTag(tag);
+            return toListLinkResponse(chatId, allEntries);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         }
@@ -111,6 +107,15 @@ public class LinkController {
 
     private LinkResponse toLinkResponse(Link entry) {
         return new LinkResponse(entry.id(), entry.url(), entry.tags(), entry.filters());
+    }
+
+    private ResponseEntity<?> toListLinkResponse(@RequestHeader("Tg-Chat-Id") Long chatId, Collection<Link> allEntries) {
+        List<LinkResponse> responses = allEntries.stream()
+                .filter(entry -> entry.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId)))
+                .map(this::toLinkResponse)
+                .collect(Collectors.toList());
+        ListLinksResponse response = new ListLinksResponse(responses, responses.size());
+        return ResponseEntity.ok(response);
     }
 
     private ApiErrorResponse createBadRequestError(String description, List<String> stacktrace) {
