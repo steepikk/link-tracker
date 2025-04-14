@@ -10,6 +10,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -52,6 +53,36 @@ public class ScrapperClient {
                 .uri("/links")
                 .header("Tg-Chat-Id", tgChatId.toString())
                 .exchangeToMono(response -> getResponseMono(response, ListLinksResponse.class));
+    }
+
+    public Mono<ListLinksResponse> getLinksByTag(Long tgChatId, String tag) {
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/links/by-tag").queryParam("tag", tag).build())
+                .header("Tg-Chat-Id", tgChatId.toString())
+                .exchangeToMono(response -> getResponseMono(response, ListLinksResponse.class));
+    }
+
+    public Mono<List<String>> getAllTags() {
+        return webClient
+                .get()
+                .uri("/links/tags")
+                .exchangeToMono(response -> response.statusCode().is2xxSuccessful()
+                        ? response.bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                        : response.bodyToMono(ApiErrorResponse.class)
+                        .flatMap(apiErrorResponse -> Mono.error(new ApiError(
+                                apiErrorResponse.getDescription(),
+                                apiErrorResponse.getCode(),
+                                apiErrorResponse.getExceptionName(),
+                                apiErrorResponse.getExceptionMessage(),
+                                apiErrorResponse.getStacktrace()))));
+    }
+
+    public Mono<Void> deleteTag(String tag) {
+        return webClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder.path("/links/tags").queryParam("tag", tag).build())
+                .exchangeToMono(response -> getResponseMono(response, Void.class));
     }
 
     public Mono<Void> registerChat(Long tgChatId) {

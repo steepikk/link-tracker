@@ -45,7 +45,10 @@ public class TelegramBotListener {
             new BotCommand("/help", "Вывод списка доступных команд"),
             new BotCommand("/track", "Начать отслеживание ссылки"),
             new BotCommand("/untrack", "Прекратить отслеживание ссылки"),
-            new BotCommand("/list", "Показать список отслеживаемых ссылок")
+            new BotCommand("/list", "Показать список отслеживаемых ссылок"),
+            new BotCommand("/listbytag", "Получение ссылок по тегу"),
+            new BotCommand("/listtags", "Получение всех тегов."),
+            new BotCommand("/deletetag", "Удаление тега")
         };
 
         SetMyCommands setMyCommands = new SetMyCommands(commands);
