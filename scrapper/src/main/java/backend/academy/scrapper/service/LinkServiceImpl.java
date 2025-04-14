@@ -86,10 +86,10 @@ public class LinkServiceImpl implements LinkService {
             linkRepository.deleteTags(link.id());
             linkRepository.deleteFilters(link.id());
             linkRepository.deleteLink(link.id());
-            return null;
+            return link;
         }
 
-        return linkRepository.findByUrl(url).orElse(null);
+        return link;
     }
 
     @Override
