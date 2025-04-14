@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,13 +29,6 @@ public class LinkServiceImpl implements LinkService {
     }
 
     @Override
-    public Optional<Link> findByUrl(String url) {
-        validateUrl(url);
-        logger.debug("Finding link by URL: {}", url);
-        return linkRepository.findByUrl(url);
-    }
-
-    @Override
     public Link addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId)
             throws IllegalArgumentException {
         validateUrl(url);
@@ -47,7 +41,27 @@ public class LinkServiceImpl implements LinkService {
         List<String> validFilters = validateAndCleanFilters(filters);
 
         logger.info("Adding or updating link: URL={}, tags={}, filters={}, chatId={}", url, validTags, validFilters, tgChatId);
-        return linkRepository.addOrUpdateLink(url, validTags, validFilters, tgChatId);
+
+        Optional<Link> existingLink = linkRepository.findByUrl(url);
+        Long linkId;
+        Instant now = Instant.now();
+
+        if (existingLink.isPresent()) {
+            linkId = existingLink.get().id();
+            linkRepository.deleteTags(linkId);
+            linkRepository.deleteFilters(linkId);
+            linkRepository.updateLinkData(linkId, url, now);
+        } else {
+            linkId = linkRepository.insertLink(url, now);
+        }
+
+        linkRepository.insertTags(linkId, validTags);
+        linkRepository.insertFilters(linkId, validFilters);
+        linkRepository.insertChat(tgChatId);
+        linkRepository.insertLinkChat(linkId, tgChatId);
+
+        return linkRepository.findByUrl(url)
+                .orElseThrow(() -> new IllegalStateException("Link not found after insertion"));
     }
 
     @Override
@@ -55,7 +69,27 @@ public class LinkServiceImpl implements LinkService {
         validateUrl(url);
         validateChatId(tgChatId);
         logger.info("Removing chat {} from link: {}", tgChatId, url);
-        return linkRepository.removeChatFromLink(url, tgChatId);
+
+        Optional<Link> optionalLink = linkRepository.findByUrl(url);
+        if (optionalLink.isEmpty()) {
+            return null;
+        }
+
+        Link link = optionalLink.get();
+        linkRepository.deleteLinkChat(link.id(), tgChatId);
+
+        Instant now = Instant.now();
+        linkRepository.updateLinkData(link.id(), url, now);
+
+        int chatCount = linkRepository.countChatsByLinkId(link.id());
+        if (chatCount == 0) {
+            linkRepository.deleteTags(link.id());
+            linkRepository.deleteFilters(link.id());
+            linkRepository.deleteLink(link.id());
+            return null;
+        }
+
+        return linkRepository.findByUrl(url).orElse(null);
     }
 
     @Override
@@ -71,7 +105,13 @@ public class LinkServiceImpl implements LinkService {
         }
         validateUrl(link.url());
         logger.info("Updating link: {}", link.url());
-        linkRepository.updateLink(link);
+
+        Instant now = Instant.now();
+        linkRepository.updateLinkData(link.id(), link.url(), now);
+        linkRepository.deleteTags(link.id());
+        linkRepository.deleteFilters(link.id());
+        linkRepository.insertTags(link.id(), validateAndCleanTags(link.tags()));
+        linkRepository.insertFilters(link.id(), validateAndCleanFilters(link.filters()));
     }
 
     @Override

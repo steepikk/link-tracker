@@ -47,76 +47,75 @@ public class LinkRepositorySQL implements LinkRepository {
     }
 
     @Override
-    public Link addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId)
-            throws IllegalArgumentException {
-        Optional<Link> existingLink = findByUrl(url);
-        Long linkId;
-        Instant now = Instant.now();
-
-        if (existingLink.isPresent()) {
-            linkId = existingLink.get().id();
-            jdbcTemplate.update("DELETE FROM link_tags WHERE link_id = ?", linkId);
-            jdbcTemplate.update("DELETE FROM link_filters WHERE link_id = ?", linkId);
-            jdbcTemplate.update(
-                    "UPDATE links SET url = ?, last_updated = ? WHERE id = ?",
-                    url, Timestamp.from(now), linkId
-            );
-        } else {
-            String sql = "INSERT INTO links (url, last_updated) VALUES (?, ?) RETURNING id";
-            linkId = jdbcTemplate.queryForObject(sql, Long.class, url, Timestamp.from(now));
-        }
-
-        if (tags != null && !tags.isEmpty()) {
-            String tagSql = "INSERT INTO link_tags (link_id, tag) VALUES (?, ?)";
-            for (String tag : tags) {
-                jdbcTemplate.update(tagSql, linkId, tag);
-            }
-        }
-
-        if (filters != null && !filters.isEmpty()) {
-            String filterSql = "INSERT INTO link_filters (link_id, filter) VALUES (?, ?)";
-            for (String filter : filters) {
-                jdbcTemplate.update(filterSql, linkId, filter);
-            }
-        }
-
-        String chatSql = "INSERT INTO chats (chat_id) VALUES (?) ON CONFLICT DO NOTHING";
-        jdbcTemplate.update(chatSql, tgChatId);
-
-        String linkChatSql = "INSERT INTO link_chat (link_id, chat_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
-        jdbcTemplate.update(linkChatSql, linkId, tgChatId);
-
-        return findByUrl(url).orElseThrow(() -> new IllegalStateException("Link not found after insertion"));
+    public Long insertLink(String url, Instant lastUpdated) {
+        String sql = "INSERT INTO links (url, last_updated) VALUES (?, ?) RETURNING id";
+        return jdbcTemplate.queryForObject(sql, Long.class, url, Timestamp.from(lastUpdated));
     }
 
     @Override
-    public Link removeChatFromLink(String url, Long tgChatId) throws Exception {
-        Optional<Link> optionalLink = findByUrl(url);
-        if (optionalLink.isEmpty()) {
-            return null;
-        }
+    public void updateLinkData(Long id, String url, Instant lastUpdated) {
+        String sql = "UPDATE links SET url = ?, last_updated = ? WHERE id = ?";
+        jdbcTemplate.update(sql, url, Timestamp.from(lastUpdated), id);
+    }
 
-        Link linkEntity = optionalLink.get();
+    @Override
+    public void deleteLink(Long id) {
+        jdbcTemplate.update("DELETE FROM links WHERE id = ?", id);
+    }
+
+    @Override
+    public void insertTags(Long linkId, List<String> tags) {
+        if (tags != null && !tags.isEmpty()) {
+            String sql = "INSERT INTO link_tags (link_id, tag) VALUES (?, ?)";
+            for (String tag : tags) {
+                jdbcTemplate.update(sql, linkId, tag);
+            }
+        }
+    }
+
+    @Override
+    public void deleteTags(Long linkId) {
+        jdbcTemplate.update("DELETE FROM link_tags WHERE link_id = ?", linkId);
+    }
+
+    @Override
+    public void insertFilters(Long linkId, List<String> filters) {
+        if (filters != null && !filters.isEmpty()) {
+            String sql = "INSERT INTO link_filters (link_id, filter) VALUES (?, ?)";
+            for (String filter : filters) {
+                jdbcTemplate.update(sql, linkId, filter);
+            }
+        }
+    }
+
+    @Override
+    public void deleteFilters(Long linkId) {
+        jdbcTemplate.update("DELETE FROM link_filters WHERE link_id = ?", linkId);
+    }
+
+    @Override
+    public void insertChat(Long chatId) {
+        String sql = "INSERT INTO chats (chat_id) VALUES (?) ON CONFLICT DO NOTHING";
+        jdbcTemplate.update(sql, chatId);
+    }
+
+    @Override
+    public void insertLinkChat(Long linkId, Long chatId) {
+        String sql = "INSERT INTO link_chat (link_id, chat_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
+        jdbcTemplate.update(sql, linkId, chatId);
+    }
+
+    @Override
+    public void deleteLinkChat(Long linkId, Long chatId) {
         String sql = "DELETE FROM link_chat WHERE link_id = ? AND chat_id = ?";
-        jdbcTemplate.update(sql, linkEntity.id(), tgChatId);
+        jdbcTemplate.update(sql, linkId, chatId);
+    }
 
-        Instant now = Instant.now();
-        jdbcTemplate.update(
-                "UPDATE links SET last_updated = ? WHERE id = ?",
-                Timestamp.from(now), linkEntity.id()
-        );
-
-        String countSql = "SELECT COUNT(*) FROM link_chat WHERE link_id = ?";
-        Integer chatCount = jdbcTemplate.queryForObject(countSql, Integer.class, linkEntity.id());
-
-        if (chatCount == null || chatCount == 0) {
-            jdbcTemplate.update("DELETE FROM link_tags WHERE link_id = ?", linkEntity.id());
-            jdbcTemplate.update("DELETE FROM link_filters WHERE link_id = ?", linkEntity.id());
-            jdbcTemplate.update("DELETE FROM links WHERE id = ?", linkEntity.id());
-            return null;
-        }
-
-        return findByUrl(url).orElse(null);
+    @Override
+    public int countChatsByLinkId(Long linkId) {
+        String sql = "SELECT COUNT(*) FROM link_chat WHERE link_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, linkId);
+        return count != null ? count : 0;
     }
 
     @Override
@@ -131,30 +130,6 @@ public class LinkRepositorySQL implements LinkRepository {
                 "LEFT JOIN link_chat lc ON l.id = lc.link_id " +
                 "GROUP BY l.id, l.url, l.last_updated";
         return jdbcTemplate.query(sql, this::mapRowToLink);
-    }
-
-    @Override
-    public void updateLink(Link link) {
-        Instant now = Instant.now();
-        String sql = "UPDATE links SET url = ?, last_updated = ? WHERE id = ?";
-        jdbcTemplate.update(sql, link.url(), Timestamp.from(now), link.id());
-
-        jdbcTemplate.update("DELETE FROM link_tags WHERE link_id = ?", link.id());
-        jdbcTemplate.update("DELETE FROM link_filters WHERE link_id = ?", link.id());
-
-        if (link.tags() != null && !link.tags().isEmpty()) {
-            String tagSql = "INSERT INTO link_tags (link_id, tag) VALUES (?, ?)";
-            for (String tag : link.tags()) {
-                jdbcTemplate.update(tagSql, link.id(), tag);
-            }
-        }
-
-        if (link.filters() != null && !link.filters().isEmpty()) {
-            String filterSql = "INSERT INTO link_filters (link_id, filter) VALUES (?, ?)";
-            for (String filter : link.filters()) {
-                jdbcTemplate.update(filterSql, link.id(), filter);
-            }
-        }
     }
 
     private Link mapRowToLink(ResultSet rs, int rowNum) throws SQLException {

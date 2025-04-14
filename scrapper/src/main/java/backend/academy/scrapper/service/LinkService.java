@@ -4,11 +4,8 @@ import backend.academy.scrapper.entity.Link;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface LinkService {
-    Optional<Link> findByUrl(String url);
-
     Link addOrUpdateLink(String url, List<String> tags, List<String> filters, Long tgChatId)
             throws IllegalArgumentException;
 
