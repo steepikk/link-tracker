@@ -4,7 +4,7 @@ import backend.academy.common.dto.ApiErrorResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import backend.academy.scrapper.service.ChatService;
+import backend.academy.scrapper.service.chat.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

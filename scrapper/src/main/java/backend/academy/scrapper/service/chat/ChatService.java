@@ -1,6 +1,4 @@
-package backend.academy.scrapper.service;
-
-import backend.academy.scrapper.entity.Chat;
+package backend.academy.scrapper.service.chat;
 
 public interface ChatService {
     void registerChat(Long chatId);
