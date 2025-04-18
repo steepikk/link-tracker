@@ -1,6 +1,6 @@
 package backend.academy.scrapper.client;
 
-import backend.academy.common.dto.GitHubContent;
+import backend.academy.common.dto.ContentUpdate;
 import backend.academy.common.dto.UpdateType;
 import backend.academy.scrapper.config.ScrapperConfig;
 import backend.academy.scrapper.exception.RepositoryNotFoundException;
@@ -61,7 +61,7 @@ public class GitHubClient {
         }
     }
 
-    public List<GitHubContent> getGitHubContent(String link) throws RepositoryNotFoundException, HttpMessageNotReadableException {
+    public List<ContentUpdate> getGitHubContent(String link) throws RepositoryNotFoundException, HttpMessageNotReadableException {
         String response = "";
         try {
             response = restClient
@@ -82,7 +82,7 @@ public class GitHubClient {
         try {
             JsonNode jsonResponse = objectMapper.readTree(response);
 
-            List<GitHubContent> contents = new ArrayList<>();
+            List<ContentUpdate> contents = new ArrayList<>();
 
             jsonResponse.forEach(content -> {
                 String title = content.get("title").asText();
@@ -92,9 +92,9 @@ public class GitHubClient {
                 String body = content.get("body").asText();
                 body = body.equals("null") ? "" : body;
                 if (content.has("pull_request")) {
-                    contents.add(new GitHubContent(UpdateType.PR, title, userName, createdInstant, body));
+                    contents.add(new ContentUpdate(UpdateType.PR, title, userName, createdInstant, body));
                 } else {
-                    contents.add(new GitHubContent(UpdateType.ISSUE, title, userName, createdInstant, body));
+                    contents.add(new ContentUpdate(UpdateType.ISSUE, title, userName, createdInstant, body));
                 }
             });
             return contents;
