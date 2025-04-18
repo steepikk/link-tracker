@@ -96,12 +96,18 @@ public class LinkController {
     }
 
     @DeleteMapping("/tags")
-    public ResponseEntity<Void> deleteTag(@RequestParam String tag) {
+    public ResponseEntity<String> deleteTag(@RequestParam String tag) {
+        if (linkService.findByTag(tag).isEmpty()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Тег '" + tag + "' не найден.");
+        }
+
         try {
             linkService.deleteTag(tag);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Ошибка удаления тега: " + e.getMessage());
         }
     }
 

@@ -180,6 +180,9 @@ public class LinkServiceImpl implements LinkService {
         if (tag == null || tag.trim().isEmpty()) {
             throw new IllegalArgumentException("Tag cannot be null or empty");
         }
+        if (linkRepository.findByTag(tag).isEmpty()) {
+            throw new IllegalArgumentException("Tag " + tag + " already exists");
+        }
     }
 
     private List<String> validateAndCleanTags(List<String> tags) {

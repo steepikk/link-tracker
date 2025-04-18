@@ -34,7 +34,9 @@ public class DeleteTagCommand implements CommandHandler {
         Mono<Void> result = scrapperClient
                 .deleteTag(tag)
                 .doOnSuccess(unused -> telegramClient.sendMessage(chatId, "Тег '" + tag + "' успешно удален."))
-                .doOnError(error -> sendErrorInfo(chatId, error, "Ошибка удаления тега"))
+                .doOnError(error -> {
+                    telegramClient.sendMessage(chatId, "Неизвестный тэг: '" + tag + "'");
+                })
                 .then();
         result.subscribe();
     }
