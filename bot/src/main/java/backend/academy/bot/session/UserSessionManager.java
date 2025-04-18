@@ -2,6 +2,7 @@ package backend.academy.bot.session;
 
 import backend.academy.bot.client.TelegramClient;
 import backend.academy.bot.command.CommandHandler;
+import backend.academy.common.dto.ContentUpdate;
 import backend.academy.common.dto.LinkUpdate;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +93,27 @@ public class UserSessionManager {
     }
 
     public void notifyUser(Long chatId, LinkUpdate update) {
-        String notificationMessage = "Обновление по ссылке: " + update.getUrl() + "\n " + update.getDescription();
+        if (update.isEmpty()) {
+            logger.warn("Empty LinkUpdate received for chatId={}", chatId);
+            return;
+        }
+
+        ContentUpdate contentUpdate = update.getContentUpdate();
+        String notificationMessage = String.format(
+                "Обновление по ссылке: %s\n" +
+                        "Тип: %s\n" +
+                        "Заголовок: %s\n" +
+                        "Автор: %s\n" +
+                        "Создано: %s\n" +
+                        "%s",
+                update.getUrl(),
+                contentUpdate.type(),
+                contentUpdate.title(),
+                contentUpdate.username(),
+                contentUpdate.createdAt(),
+                contentUpdate.preview().isEmpty() ? "" : "Описание: " + contentUpdate.preview()
+        );
+
         sessions.get(chatId).reset();
         telegramClient.sendMessage(chatId, "Уведомление:\n" + notificationMessage);
         logger.info("Notify user: chatId={}, notificationMessage={}", chatId, notificationMessage);

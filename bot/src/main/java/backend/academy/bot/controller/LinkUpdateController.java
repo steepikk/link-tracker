@@ -37,7 +37,12 @@ public class LinkUpdateController {
     public ResponseEntity<?> receiveUpdate(@Valid @RequestBody LinkUpdate update) {
         if (!update.isEmpty()) {
             try {
-                LOGGER.info("Получено обновление: {}", update.getDescription());
+                LOGGER.info("Получено обновление: {} - {} by {} at {}",
+                        update.getContentUpdate().type(),
+                        update.getContentUpdate().title(),
+                        update.getContentUpdate().username(),
+                        update.getContentUpdate().createdAt());
+
                 List<Long> chatStorage = update.getTgChatIds();
                 for (Long chatId : chatStorage) {
                     userSessionManager.notifyUser(chatId, update);
