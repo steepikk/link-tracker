@@ -5,22 +5,18 @@ import java.util.List;
 public class LinkUpdate {
     private Long id;
     private String url;
-    private String description;
+    private ContentUpdate contentUpdate;
     private List<Long> tgChatIds;
 
-    public LinkUpdate(long id, String url, String description, List<Long> tgChatIds) {
+    public LinkUpdate(long id, String url, ContentUpdate contentUpdate, List<Long> tgChatIds) {
         this.id = id;
         this.url = url;
-        this.description = description;
+        this.contentUpdate = contentUpdate;
         this.tgChatIds = tgChatIds;
     }
 
     public long getId() {
         return id;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String getUrl() {
@@ -39,15 +35,19 @@ public class LinkUpdate {
         this.url = url;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public void setTgChatIds(List<Long> tgChatIds) {
         this.tgChatIds = tgChatIds;
     }
 
+    public ContentUpdate getContentUpdate() {
+        return contentUpdate;
+    }
+
+    public void setContentUpdate(ContentUpdate contentUpdate) {
+        this.contentUpdate = contentUpdate;
+    }
+
     public boolean isEmpty() {
-        return id == null || url == null || description == null || tgChatIds == null;
+        return id == null || url == null || contentUpdate == null || tgChatIds == null;
     }
 }

@@ -1,6 +1,20 @@
 package backend.academy.common.dto;
 
 public enum UpdateType {
-    PR,
-    ISSUE
+    COMMENT("COMMENT"),
+    ANSWER("ANSWER"),
+    PR("PR"),
+    ISSUE("ISSUE");
+
+    private final String value;
+
+    UpdateType(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
 }
