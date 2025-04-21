@@ -3,7 +3,7 @@ app:
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
-  access-type: ORM
+  access-type: SQL
 
 bot:
   base-url: "http://localhost:8080"
@@ -14,9 +14,10 @@ spring:
   liquibase:
     enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/link_tracker
-    username: postgres
-    password: Stepan2005
+    url: jdbc:postgresql://localhost:5432/docker_link_tracker
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
