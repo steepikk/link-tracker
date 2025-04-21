@@ -159,6 +159,36 @@ public class LinkServiceImpl implements LinkService {
         linkRepository.deleteTag(tag);
     }
 
+    @Override
+    public Link addTagToLink(String url, String tag, Long chatId) {
+        Optional<Link> optionalLink = linkRepository.findByUrl(url);
+        if (optionalLink.isEmpty()) {
+            return null;
+        }
+
+        Link link = optionalLink.get();
+
+        boolean isSubscribed = link.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId));
+        if (!isSubscribed) {
+            throw new IllegalArgumentException("Чат не подписан на ссылку: " + url);
+        }
+
+        List<String> updatedTags = new ArrayList<>(link.tags());
+        if (!updatedTags.contains(tag)) {
+            updatedTags.add(tag);
+            link = new Link(
+                    link.id(),
+                    link.url(),
+                    link.lastUpdated(),
+                    updatedTags,
+                    link.filters(),
+                    link.chats()
+            );
+            link = linkRepository.update(link);
+        }
+        return link;
+    }
+
     private void validateUrl(String url) {
         if (url == null || url.trim().isEmpty()) {
             throw new IllegalArgumentException("URL cannot be null or empty");

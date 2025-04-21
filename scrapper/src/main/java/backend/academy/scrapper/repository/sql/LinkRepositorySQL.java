@@ -59,6 +59,26 @@ public class LinkRepositorySQL implements LinkRepository {
     }
 
     @Override
+    public Link update(Link link) {
+        jdbcTemplate.update(
+                "UPDATE links SET url = ?, last_updated = ? WHERE id = ?",
+                link.url(), Timestamp.from(link.lastUpdated()), link.id()
+        );
+
+        deleteTags(link.id());
+        deleteFilters(link.id());
+        jdbcTemplate.update("DELETE FROM link_chat WHERE link_id = ?", link.id());
+
+        insertTags(link.id(), link.tags());
+        insertFilters(link.id(), link.filters());
+        for (Chat chat : link.chats()) {
+            insertLinkChat(link.id(), chat.chatId());
+        }
+
+        return link;
+    }
+
+    @Override
     public void deleteLink(Long id) {
         jdbcTemplate.update("DELETE FROM links WHERE id = ?", id);
     }

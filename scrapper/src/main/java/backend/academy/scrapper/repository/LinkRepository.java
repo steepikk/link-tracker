@@ -12,6 +12,8 @@ public interface LinkRepository {
 
     Long insertLink(String url, Instant lastUpdated);
 
+    Link update(Link link);
+
     void updateLinkData(Long id, String url, Instant lastUpdated);
 
     void deleteLink(Long id);

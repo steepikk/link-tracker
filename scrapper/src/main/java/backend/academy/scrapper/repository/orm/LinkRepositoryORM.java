@@ -52,6 +52,25 @@ public interface LinkRepositoryORM extends JpaRepository<Link, Long>, LinkReposi
     }
 
     @Override
+    default Link update(Link link) {
+        return findById(link.id()).map(existingLink -> {
+            existingLink.url(link.url());
+            existingLink.lastUpdated(link.lastUpdated());
+
+            existingLink.tags().clear();
+            existingLink.tags().addAll(link.tags());
+
+            existingLink.filters().clear();
+            existingLink.filters().addAll(link.filters());
+
+            existingLink.chats().clear();
+            existingLink.chats().addAll(link.chats());
+
+            return save(existingLink);
+        }).orElseThrow(() -> new IllegalArgumentException("Link not found with id: " + link.id()));
+    }
+
+    @Override
     default void deleteTags(Long linkId) {
         findById(linkId).ifPresent(link -> {
             link.tags(new ArrayList<>());

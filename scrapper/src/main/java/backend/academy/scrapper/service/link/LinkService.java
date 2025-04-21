@@ -22,4 +22,6 @@ public interface LinkService {
     List<String> getAllTags();
 
     void deleteTag(String tag);
+
+    Link addTagToLink(String url, String tag, Long chatId);
 }

@@ -1,6 +1,7 @@
 package backend.academy.scrapper.controller;
 
 import backend.academy.common.dto.AddLinkRequest;
+import backend.academy.common.dto.AddTagRequest;
 import backend.academy.common.dto.ApiErrorResponse;
 import backend.academy.common.dto.LinkResponse;
 import backend.academy.common.dto.ListLinksResponse;
@@ -108,6 +109,21 @@ public class LinkController {
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Ошибка удаления тега: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/add-tag")
+    public ResponseEntity<LinkResponse> addTag(
+            @RequestHeader("Tg-Chat-Id") Long chatId,
+            @RequestBody AddTagRequest request) {
+        try {
+            Link link = linkService.addTagToLink(request.url(), request.tag(), chatId);
+            if (link == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(new LinkResponse(link.id(), link.url(), link.tags(), link.filters()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
