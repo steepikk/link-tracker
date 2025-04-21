@@ -113,7 +113,7 @@ public class LinkController {
     }
 
     @PostMapping("/add-tag")
-    public ResponseEntity<LinkResponse> addTag(
+    public ResponseEntity<?> addTag(
             @RequestHeader("Tg-Chat-Id") Long chatId,
             @RequestBody AddTagRequest request) {
         try {

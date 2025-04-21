@@ -168,6 +168,11 @@ public class LinkServiceImpl implements LinkService {
 
         Link link = optionalLink.get();
 
+        if (!isLinkAlive(url)) {
+            System.out.println("owdjkioweoiwejkdmi");
+            return null;
+        }
+
         boolean isSubscribed = link.chats().stream().anyMatch(chat -> chat.chatId().equals(chatId));
         if (!isSubscribed) {
             throw new IllegalArgumentException("Чат не подписан на ссылку: " + url);
