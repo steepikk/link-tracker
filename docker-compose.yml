@@ -12,6 +12,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  liquibase-migrations:
+    container_name: migrations
+    image: liquibase/liquibase:4.29
+    depends_on:
+      - postgres
+    command:
+      - --searchPath=/migrations
+      - --changelog-file=changelog-master.xml
+      - --url=jdbc:postgresql://postgres:5432/docker_link_tracker
+      - --username=admin
+      - --password=admin
+      - update
+    volumes:
+      - ./migrations:/migrations
+
   redis:
     image: redis:alpine
     container_name: my_redis
