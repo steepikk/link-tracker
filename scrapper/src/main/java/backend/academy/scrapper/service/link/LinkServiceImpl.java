@@ -1,7 +1,7 @@
 package backend.academy.scrapper.service.link;
 
 import backend.academy.scrapper.entity.Link;
-import backend.academy.scrapper.repository.LinkRepository;
+import backend.academy.scrapper.repository.link.LinkRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

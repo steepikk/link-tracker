@@ -1,4 +1,4 @@
-package backend.academy.scrapper.repository;
+package backend.academy.scrapper.repository.chat;
 
 public interface ChatRepository {
     void addChatById(Long chatId);

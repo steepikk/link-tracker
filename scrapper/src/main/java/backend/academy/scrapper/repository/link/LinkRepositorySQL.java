@@ -1,8 +1,7 @@
-package backend.academy.scrapper.repository.sql;
+package backend.academy.scrapper.repository.link;
 
 import backend.academy.scrapper.entity.Chat;
 import backend.academy.scrapper.entity.Link;
-import backend.academy.scrapper.repository.LinkRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 package backend.academy.scrapper.service.chat;
 
-import backend.academy.scrapper.repository.ChatRepository;
+import backend.academy.scrapper.repository.chat.ChatRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

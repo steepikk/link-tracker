@@ -1,4 +1,4 @@
-package backend.academy.scrapper.repository;
+package backend.academy.scrapper.repository.link;
 
 import backend.academy.scrapper.entity.Link;
 
