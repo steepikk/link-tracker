@@ -2,6 +2,7 @@ package backend.academy.bot.client;
 
 import backend.academy.bot.error.ApiError;
 import backend.academy.common.dto.AddLinkRequest;
+import backend.academy.common.dto.AddTagRequest;
 import backend.academy.common.dto.ApiErrorResponse;
 import backend.academy.common.dto.LinkResponse;
 import backend.academy.common.dto.ListLinksResponse;
@@ -83,6 +84,16 @@ public class ScrapperClient {
                 .delete()
                 .uri(uriBuilder -> uriBuilder.path("/links/tags").queryParam("tag", tag).build())
                 .exchangeToMono(response -> getResponseMono(response, Void.class));
+    }
+
+    public Mono<LinkResponse> addTag(Long tgChatId, String url, String tag) {
+        AddTagRequest request = new AddTagRequest(url, tag);
+        return webClient
+                .post()
+                .uri("/links/add-tag")
+                .header("Tg-Chat-Id", tgChatId.toString())
+                .bodyValue(request)
+                .exchangeToMono(response -> getResponseMono(response, LinkResponse.class));
     }
 
     public Mono<Void> registerChat(Long tgChatId) {

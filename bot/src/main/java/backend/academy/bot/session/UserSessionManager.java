@@ -81,7 +81,7 @@ public class UserSessionManager {
                 session.setState(UserSessionState.WAITING_FOR_LINK);
                 telegramClient.sendMessage(chatId, "Введите ссылку для отслеживания:");
             }
-        } else if (lower.startsWith("/help") || lower.startsWith("/list") || lower.startsWith("/untrack") || lower.startsWith("/deletetag")) {
+        } else if (lower.startsWith("/help") || lower.startsWith("/list") || lower.startsWith("/untrack") || lower.startsWith("/deletetag") || lower.startsWith("/addtag")) {
             commandHandlers.get(lower.split(" ")[0]).handle(chatId, messageText);
             session.reset();
         } else if (lower.startsWith("/start")) {

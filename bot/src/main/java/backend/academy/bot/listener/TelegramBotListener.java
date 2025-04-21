@@ -8,7 +8,9 @@ import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SetMyCommands;
+
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,14 +43,15 @@ public class TelegramBotListener {
 
     private void registerCommands() {
         BotCommand[] commands = {
-            new BotCommand("/start", "Регистрация пользователя"),
-            new BotCommand("/help", "Вывод списка доступных команд"),
-            new BotCommand("/track", "Начать отслеживание ссылки"),
-            new BotCommand("/untrack", "Прекратить отслеживание ссылки"),
-            new BotCommand("/list", "Показать список отслеживаемых ссылок"),
-            new BotCommand("/listbytag", "Получение ссылок по тегу"),
-            new BotCommand("/listtags", "Получение всех тегов."),
-            new BotCommand("/deletetag", "Удаление тега")
+                new BotCommand("/start", "Регистрация пользователя"),
+                new BotCommand("/help", "Вывод списка доступных команд"),
+                new BotCommand("/track", "Начать отслеживание ссылки"),
+                new BotCommand("/untrack", "Прекратить отслеживание ссылки"),
+                new BotCommand("/list", "Показать список отслеживаемых ссылок"),
+                new BotCommand("/addtag", "Добавить тэг к существующей ссылке"),
+                new BotCommand("/listbytag", "Получение ссылок по тегу"),
+                new BotCommand("/listtags", "Получение всех тегов."),
+                new BotCommand("/deletetag", "Удаление тега")
         };
 
         SetMyCommands setMyCommands = new SetMyCommands(commands);
