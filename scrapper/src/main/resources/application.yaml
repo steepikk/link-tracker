@@ -14,10 +14,9 @@ spring:
   liquibase:
     enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/docker_link_tracker
-    username: admin
-    password: admin
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/link_tracker
+    username: postgres
+    password: Stepan2005
   jpa:
     hibernate:
       ddl-auto: update
